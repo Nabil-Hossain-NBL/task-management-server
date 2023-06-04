@@ -33,7 +33,15 @@ async function run() {
     app.get("/task", async (req, res) => {
       const cursor = taskCollection.find();
       const result = await cursor.toArray();
-      res.send(result)
+      res.send(result);
+    })
+
+    // Update A Task
+    app.get("/task/:id", async (req, res) => {
+      const id = rq.params.id;
+      const query = {_id: new ObjectId(id)};
+      const result = await taskCollection.findOne(query);
+      res.send(result);
     })
 
     // Post A Task
@@ -41,12 +49,12 @@ async function run() {
     app.post("/task", async (req, res) => {
       const newTask = req.body;
       const result = await taskCollection.insertOne(newTask)
-      res.send(result)
+      res.send(result);
     })
 
     // Delete A Task
     app.delete('/task/:id', async (req, res) => {
-      const di = req.params.id;
+      const id = req.params.id;
       const query = {_id: new ObjectId(id)}
       const result = await taskCollection.deleteOne(query);
       res.send(result);
