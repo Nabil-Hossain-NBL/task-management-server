@@ -10,13 +10,9 @@ const port = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// task-management-user
-// gFrcJYAKuSoPuwvx
-console.log(process.env.DB_USER);
-
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.vn3zm0i.mongodb.net/?retryWrites=true&w=majority`;
-console.log(uri);
+
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -32,6 +28,15 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const taskCollection = client.db("taskManager").collection("tasks")
+
+    // Get All Tasks
+    app.get("/task", async (req, res) => {
+      const cursor = taskCollection.find();
+      const result = await cursor.toArray();
+      res.send(result)
+    })
+
+    // Post A Task
 
     app.post("/task", async (req, res) => {
       const newTask = req.body;
