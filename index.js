@@ -7,7 +7,13 @@ const port = process.env.PORT || 5000;
 
 // middleware
 
-app.use(cors());
+const corsConfig = {
+  origin: '*',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE']
+}
+app.use(cors(corsConfig))
+
 app.use(express.json());
 
 
@@ -26,7 +32,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
     const taskCollection = client.db("taskManager").collection("tasks")
 
     // Get All Tasks
@@ -36,10 +42,10 @@ async function run() {
       res.send(result);
     })
 
-    // Update A Task
+    // Get A Spacific Task
     app.get("/task/:id", async (req, res) => {
-      const id = rq.params.id;
-      const query = {_id: new ObjectId(id)};
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
       const result = await taskCollection.findOne(query);
       res.send(result);
     })
@@ -52,10 +58,31 @@ async function run() {
       res.send(result);
     })
 
+    //  Update A Task
+
+    app.patch("/task/:id", async (req, res) => {
+      const id = req.params.id
+      const updatedTask = req.body
+      const filter = { _id: new ObjectId(id) }
+      const updatedDoc = {
+        $set: {
+          // price, quantity, discription
+          title: updatedTask.title,
+          description: updatedTask.description,
+          value: updatedTask.value
+        }
+      }
+
+      const result = await taskCollection.updateOne(filter, updatedDoc)
+
+      res.send(result)
+    })
+
+
     // Delete A Task
     app.delete('/task/:id', async (req, res) => {
       const id = req.params.id;
-      const query = {_id: new ObjectId(id)}
+      const query = { _id: new ObjectId(id) }
       const result = await taskCollection.deleteOne(query);
       res.send(result);
     })
